@@ -29,4 +29,5 @@ var template = {
 	}
 }
 
+// 객체 모듈화
 module.exports = template;

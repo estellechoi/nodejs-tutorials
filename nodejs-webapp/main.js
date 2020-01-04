@@ -9,8 +9,9 @@ var template = require('./lib/template.js');
 // NPM으로 설치한 모듈 (node_modules 디렉토리에서 일치하는 모듈을 탐색해서 가져온다.)
 var sanitizeHtml = require('sanitize-html');
 
-// 어플리케이션
-// 웹어플리케이션 접속이 발새할 때마다 createServer의 콜백함수가 호출된다.
+// * http.createServer(requestListener); http.Server 객체를 반환한다.
+// * The requestListener is a function which is automatically added to the 'request' event.
+// -> 웹어플리케이션 접속이 발새할 때마다 createServer의 콜백함수가 호출된다.
 var app = http.createServer(function (request, response) {
 	var _url = request.url; // 사용자 요청에서 url을 반환
 	console.log(url.parse(_url, true)); // 해당 url을 파싱하여 객체를 반환
@@ -190,6 +191,8 @@ var app = http.createServer(function (request, response) {
 		response.end("Not found");
 	}
 });
+
+// * http.Server.listen(); starts the HTTP server listening for connections. (서버 구동)
 // port: 3000
 // 웹서버 포트의 기본값은 80 (url 에서 생략 가능)
 app.listen(3000);

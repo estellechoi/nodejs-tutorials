@@ -6,18 +6,20 @@
 
 Designed to build scalable network applications, as an asynchronous event-driven JavaScript runtime.
 
-### Install Node.js Using Homebrew on Mac
+### Install Node.js
 
-- Using Homebrew
+Using Homebrew on Mac
 
 ```console
 # Install Node.js and NPM together
 brew install node
 ```
 
+Or Download [here](https://nodejs.org/ko/).
+
 ### Use NPM to Manage Packages for a Project
 
-- Init Management of a Project Using NPM
+> NPM : Node Packeage Manager
 
 ```console
 # Creates package.json file
@@ -54,17 +56,17 @@ pm2 start app.js —-watch
 
 Ignore files under Specific Directories
 
-````console
+```console
 pm2 start test.js —-watch —-ignore-watch="data/* session/*"
-`
+```
 
 Start App with No Daemon Mode
 
-> Daemon ? A Background Program
+> Daemon : A Background Program
 
 ```console
 pm2 start test.js —-watch —-no-daemon
-````
+```
 
 ### Stop App
 

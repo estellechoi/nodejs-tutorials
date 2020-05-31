@@ -42,7 +42,7 @@ sudo npm install pm2 --save
 npm install sanitize-html --save
 ```
 
----
+<br>
 
 ## Use PM2
 
@@ -79,6 +79,8 @@ pm2 stop app
 ```console
 pm2 kill
 ```
+
+<br>
 
 ---
 

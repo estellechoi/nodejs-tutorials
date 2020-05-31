@@ -1,13 +1,26 @@
-// node.js 내장모듈
-var http = require('http');
-var fs = require('fs');
-var url = require('url');
-var qs = require('querystring');
-var path = require('path');
-// 직접 만든 모듈
-var template = require('./lib/template.js');
-// NPM으로 설치한 모듈 (node_modules 디렉토리에서 일치하는 모듈을 탐색해서 가져온다.)
-var sanitizeHtml = require('sanitize-html');
+// modules of node.js (내장모듈)
+var http = require("http");
+var fs = require("fs");
+var url = require("url");
+var qs = require("querystring");
+var path = require("path");
+
+// module self-made
+var template = require("./lib/template.js");
+
+// modules installed using NPM (node_modules 디렉토리에서 일치하는 모듈을 탐색해서 가져온다.)
+var sanitizeHtml = require("sanitize-html");
+var mysql = require("mysql");
+
+// connecting to mysql server
+var connection = mysql.createConnection({
+	host: "localhost",
+	user: "temp_user",
+	password: "yk0425",
+	database: "board_node",
+});
+
+connection.connect();
 
 // * http.createServer(requestListener); http.Server 객체를 반환한다.
 // * The requestListener is a function which is automatically added to the 'request' event.
@@ -22,17 +35,39 @@ var app = http.createServer(function (request, response) {
 	if (pathname === "/") {
 		// queryString 이 없을 때 (홈 화면)
 		if (queryData.id === undefined) {
-			// fs.readdir(); 폴더의 파일 목록을 가져오기 (파일명)
-			// 비동기 메소드이다.
-			fs.readdir("./data", function (err, fileList) {
-				var title = "Welcome";
-				var data = "Hello node.js";
-				var list = template.getList(fileList);
-				var html = template.getHTML(title, list,
+			// fs.readdir(); 폴더의 파일 목록을 가져오기 (파일명) - 비동기 메소드이다.
+			// fs.readdir("./data", function (err, fileList) {
+			// 	var title = "Welcome";
+			// 	var data = "Hello node.js";
+			// 	var list = template.getList(fileList);
+			// 	var html = template.getHTML(
+			// 		title,
+			// 		list,
+			// 		`<h2>${title}</h2><p>${data}</p>`,
+			// 		`<a href="/create">create</a>`
+			// 	);
+			// 	response.writeHead(200); // 응답코드
+			// 	response.end(html); // template 을 응답
+			// });
+			connection.query(`SELECT * FROM topic`, function (err, results) {
+				if (err) {
+					console.log(err);
+					throw err;
+				}
+
+				const title = "Welcome";
+				const data = "Hello node.js";
+
+				// results is an array of objects.
+				const list = template.getList(results);
+				const html = template.getHTML(
+					title,
+					list,
 					`<h2>${title}</h2><p>${data}</p>`,
-					`<a href="/create">create</a>`);
-				response.writeHead(200); // 응답코드
-				response.end(html); // template 을 응답
+					`<a href="/create">create</a>`
+				);
+				response.writeHead(200);
+				response.end(html);
 			});
 		}
 		// queryString 있을 때
@@ -54,18 +89,21 @@ var app = http.createServer(function (request, response) {
 					// 파라미터를 사용하여 허용되는 html 태그를 설정할 수 있다.
 					var titleSani = sanitizeHtml(title);
 					var dataSani = sanitizeHtml(data, {
-						allowedTags: ['h1']
+						allowedTags: ["h1"],
 					});
 
 					// delete 기능은 보안상의 이유로 GET 방식으로 하면 안된다. (삭제 URL이 외부에 노출되면 누구나 삭제가 가능할 수 있기 때문)
-					var html = template.getHTML(titleSani, list,
+					var html = template.getHTML(
+						titleSani,
+						list,
 						`<h2>${titleSani}</h2><p>${dataSani}</p>`,
 						`<a href="/create">create</a>
 						 <a href="/update?id=${qs.escape(titleSani)}">update</a>
 						 <form action="/delete_process" method="post">
 						 	<input type="hidden" name="id" value="${titleSani}">
 							<input type="submit" value="delete">
-						 </form>`);
+						 </form>`
+					);
 					// response.end(fs.readFileSync(__dirname + url));
 					response.writeHead(200);
 					response.end(html);
@@ -76,13 +114,18 @@ var app = http.createServer(function (request, response) {
 		fs.readdir("./data", function (err, fileList) {
 			var title = "Create";
 			var list = template.getList(fileList);
-			var html = template.getHTML(title, list, `
+			var html = template.getHTML(
+				title,
+				list,
+				`
 				<form action="/create_process" method="post">
 					<input type="text" name="title" placeholder="title"><br>
 					<textarea name="description" placeholder="description"></textarea><br>
 					<input type="submit" value="ok"><br>
 				</form>
-			`, "");
+			`,
+				""
+			);
 			response.writeHead(200); // 응답코드
 			response.end(html); // template 을 응답
 		});
@@ -111,13 +154,15 @@ var app = http.createServer(function (request, response) {
 			var description = postData.description;
 
 			// * fs.writeFile(파일 경로, 파일 내용, 인코딩, 콜백함수); 파일을 작성한다. (파일 경로가 없다면 새 파일 생성)
-			fs.writeFile(`data/${titleFiltered}`, description, "UTF-8", function (err) {
+			fs.writeFile(`data/${titleFiltered}`, description, "UTF-8", function (
+				err
+			) {
 				// 콜백함수의 결과에 따라 수행될 내용은 비동기 메소드 안에 작성해야 ..
 				// * redirect 코드 : 302
 				// * qs.escape(); qs.unescape();
 				// URL은 아스키코드로 이뤄져야하기 때문에 그 외의 문자는 “%”와 16진수 문자를 조합해 인코딩해야 한다. (escapte 처리)
 				response.writeHead(302, {
-					Location: `/?id=${qs.escape(titleFiltered)}`
+					Location: `/?id=${qs.escape(titleFiltered)}`,
 				});
 				response.end();
 			});
@@ -128,14 +173,19 @@ var app = http.createServer(function (request, response) {
 			fs.readFile(`data/${idFiltered}`, "UTF-8", function (err, data) {
 				var title = queryData.id;
 				var list = template.getList(fileList);
-				var html = template.getHTML(title, list, `
+				var html = template.getHTML(
+					title,
+					list,
+					`
 					<form action="/update_process" method="post">
 						<input type="hidden" name="id" value="${title}">
 						<input type="text" name="title" placeholder="title" value="${title}"><br>
 						<textarea name="description" placeholder="description">${data}</textarea><br>
 						<input type="submit" value="ok"><br>
 					</form>
-				`, "");
+				`,
+					""
+				);
 				response.writeHead(200); // 응답코드
 				response.end(html); // template 을 응답
 			});
@@ -157,10 +207,12 @@ var app = http.createServer(function (request, response) {
 			// * fs.rename(old path, new path, callback); 파일명을 바꾼다.
 			fs.rename(`data/${idFiltered}`, `data/${titleFiltered}`, function (err) {
 				// * fs.writeFile(); 파일을 작성한다.
-				fs.writeFile(`data/${titleFiltered}`, description, "UTF-8", function (err) {
+				fs.writeFile(`data/${titleFiltered}`, description, "UTF-8", function (
+					err
+				) {
 					// * redirect 코드 : 302
 					response.writeHead(302, {
-						Location: `/?id=${qs.escape(titleFiltered)}`
+						Location: `/?id=${qs.escape(titleFiltered)}`,
 					});
 					response.end();
 				});
@@ -179,7 +231,7 @@ var app = http.createServer(function (request, response) {
 			// fs.unlink(); 파일 또는 symbolic link를 삭제한다.
 			fs.unlink(`data/${idFiltered}`, function (err) {
 				response.writeHead(302, {
-					Location: `/`
+					Location: `/`,
 				});
 				response.end();
 			});

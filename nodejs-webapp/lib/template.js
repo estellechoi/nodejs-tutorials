@@ -18,16 +18,17 @@ var template = {
 				</html>
 		`;
 	},
-	getList: function (fileList) {
+	getList: function (data) {
 		var list = "<ul>";
-		fileList.forEach(function (file) {
-			var li = `<li><a href="/?id=${file}">${file}</a></li>`;
+		data.forEach(function (item) {
+			// var li = `<li><a href="/?id=${item}">${item}</a></li>`;
+			var li = `<li><a href="/?id=${item.id}">${item.title}</a></li>`;
 			list += li;
 		});
 		list = list + "</ul>";
 		return list;
-	}
-}
+	},
+};
 
 // 객체 모듈화
 module.exports = template;

@@ -4,7 +4,7 @@
 
 ### Node.js is
 
-- As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications.
+As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications.
 
 ### Install Node.js Using Homebrew on Mac
 

@@ -1,26 +1,12 @@
 // modules of node.js (내장모듈)
 var http = require("http");
-var fs = require("fs");
 var url = require("url");
 var qs = require("querystring");
 var path = require("path");
 
 // module self-made
 var template = require("./lib/template.js");
-
-// modules installed using NPM (node_modules 디렉토리에서 일치하는 모듈을 탐색해서 가져온다.)
-var sanitizeHtml = require("sanitize-html");
-var mysql = require("mysql");
-
-// connecting to mysql server
-const connection = mysql.createConnection({
-	host: "localhost",
-	user: "temp_user",
-	password: "yk0425",
-	database: "board_node",
-});
-
-connection.connect();
+var connection = require("./lib/db.js");
 
 // * http.createServer(requestListener); http.Server 객체를 반환한다.
 // * The requestListener is a function which is automatically added to the 'request' event.

@@ -42,11 +42,9 @@ sudo npm install pm2 --save
 npm install sanitize-html --save
 ```
 
-<br>
+### Use PM2
 
-## Use PM2
-
-### Start App Using PM2 with Watch Mode
+#### Start App Using PM2 with Watch Mode
 
 Reloads app when files changed
 
@@ -68,13 +66,13 @@ Start App with No Daemon Mode
 pm2 start test.js —-watch —-no-daemon
 ```
 
-### Stop App
+#### Stop App
 
 ```console
 pm2 stop app
 ```
 
-### Kill All Apps and Delete Them
+#### Kill All Apps and Delete Them
 
 ```console
 pm2 kill

@@ -44,7 +44,7 @@ npm install sanitize-html --save
 
 ### Use PM2
 
-#### Start App Using PM2 with Watch Mode
+#### Run App Using PM2 with Watch Mode
 
 Reloads app when files changed
 
@@ -52,13 +52,13 @@ Reloads app when files changed
 pm2 start app.js —-watch
 ```
 
-Ignore files under Specific Directories
+Ignore files under specific directories
 
 ```console
 pm2 start test.js —-watch —-ignore-watch="data/* session/*"
 ```
 
-Start App with No Daemon Mode
+Run app under no daemon mode
 
 > Daemon : A Background Program
 
@@ -66,7 +66,7 @@ Start App with No Daemon Mode
 pm2 start test.js —-watch —-no-daemon
 ```
 
-#### Stop App
+#### Stop Running App
 
 ```console
 pm2 stop app

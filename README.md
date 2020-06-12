@@ -17,16 +17,18 @@ brew install node
 
 Or Download [here](https://nodejs.org/ko/).
 
-### Use NPM to Manage Packages for a Project
+<br>
 
-> NPM : Node Packeage Manager
+### Init package management
 
 ```console
 # Creates package.json file
 npm init
 ```
 
-### Recommended Modules
+<br>
+
+### Recommended modules
 
 - `pm2`
 
@@ -41,6 +43,8 @@ sudo npm install pm2 --save
 ```console
 npm install sanitize-html --save
 ```
+
+<br>
 
 ### Use PM2
 

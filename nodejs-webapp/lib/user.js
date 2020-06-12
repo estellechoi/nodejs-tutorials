@@ -44,7 +44,7 @@ exports.createProcess = function (request, response, queryData) {
 		const name = postData.name;
 		const profile = postData.profile;
 
-		connection.query(
+		const query = connection.query(
 			`INSERT INTO author (name, profile) VALUES (?, ?)`,
 			[name, profile],
 			(err, results) => {
@@ -56,6 +56,7 @@ exports.createProcess = function (request, response, queryData) {
 				response.end();
 			}
 		);
+		console.log(query.sql);
 	});
 };
 
@@ -105,6 +106,9 @@ exports.updateProcess = function (request, response, queryData) {
 };
 
 exports.deleteProcess = function (request, response, queryData) {
+	// * security tips
+	// `DELETE FROM author WHERE id = ${queryData.id}` => SQL injection attacks can occur through queryString manipulation.
+	// ${connection.escape(queryData.id)} => escape() method is one of the ways to avoid SQL injection attack. (embrace user's input with '')
 	connection.query(`DELETE FROM author WHERE id = ?`, [queryData.id], (err) => {
 		if (err) throw err;
 

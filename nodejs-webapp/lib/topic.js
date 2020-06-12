@@ -6,6 +6,7 @@ var qs = require("querystring");
 var path = require("path");
 var connection = require("./db");
 var template = require("./template");
+var sanitizeHtml = require("sanitize-html"); // remove dangerous scripting part user created.
 
 exports.home = function (request, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, results) => {
@@ -30,33 +31,32 @@ exports.page = function (request, response, queryData) {
 		if (err) throw err;
 		// using ? in sql query blocks possible hacking attempts.
 		connection.query(
-			`SELECT * FROM topic WHERE id = ?`,
+			`SELECT * FROM topic LEFT JOIN author ON topic.author_id = author.id WHERE topic.id = ?`,
 			[queryData.id],
 			(err, results) => {
 				if (err) throw err;
+				if (!results.length) return response.writeHead(200);
 
-				if (results.length) {
-					const res = results[0];
-					const title = res.title;
-					const data = res.description;
+				const title = results[0].title;
+				const data = results[0].description;
+				const author = results[0].name ? results[0].name : "Anonymous user";
 
-					const list = template.getList(topics);
-					const html = template.getHTML(
-						title,
-						list,
-						`<h2>${title}</h2><p>${data}</p>`,
-						`<a href="/create">create</a>
+				const list = template.getList(topics);
+				const html = template.getHTML(
+					title,
+					list,
+					`<h2>${sanitizeHtml(title)}</h2>
+                    <p class="sub_info">Author: ${sanitizeHtml(author)}</p>
+                    <p class="para">${sanitizeHtml(data)}</p>`,
+					`<a href="/create">create</a>
                         <a href="/update?id=${queryData.id}">update</a>
                         <form action="/delete_process" method="post">
                             <input type="hidden" name="id" value="${queryData.id}">
                             <input type="submit" value="delete">
                         </form>`
-					);
-					response.writeHead(200);
-					response.end(html);
-					return;
-				}
+				);
 				response.writeHead(200);
+				response.end(html);
 			}
 		);
 	});
@@ -66,7 +66,7 @@ exports.create = function (request, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 
-		const title = "Create";
+		const title = "<div>Create</div>";
 		console.log(title);
 		const list = template.getList(topics);
 		const html = template.getHTML(
@@ -74,8 +74,10 @@ exports.create = function (request, response, queryData) {
 			list,
 			`
             <form action="/create_process" method="post">
-                <input type="text" name="title" placeholder="title"><br>
-                <textarea name="description" placeholder="description"></textarea><br>
+                <input type="text" name="name" placeholder="User name"><br>
+                <input type="text" name="profile" placeholder="Introduce yourself."><br>
+                <input type="text" name="title" placeholder="Title"><br>
+                <textarea name="description" placeholder="Description"></textarea><br>
                 <input type="submit" value="ok"><br>
             </form>
             `,
@@ -103,23 +105,48 @@ exports.createProcess = function (request, response, queryData) {
 	request.on("end", () => {
 		// 수신한 POST 데이터 객체
 		const postData = qs.parse(body);
-		console.log(postData);
-
 		const title = postData.title; // encodeURI vs qs.escape() ?
 		const titleFiltered = path.parse(title).base;
 		const description = postData.description;
-		connection.query(
-			`INSERT INTO topic (title, description, created, author_id) VALUES (?, ?, NOW(), ?)`,
-			[titleFiltered, description, 1],
-			(err, results) => {
-				if (err) throw err;
 
-				response.writeHead(302, {
-					Location: `/?id=${results.insertId}`,
-				});
-				response.end();
-			}
-		);
+		const name = postData.name;
+		const profile = postData.profile;
+		if (name && name.length) {
+			connection.query(
+				`INSERT INTO author (name, profile) VALUES (?, ?)`,
+				[name, profile],
+				(err) => {
+					if (err) throw err;
+
+					connection.query(
+						`SELECT id FROM author WHERE name = ? and profile = ?`,
+						[name, profile],
+						(err, results) => {
+							if (err) throw err;
+							if (!results.length)
+								return response.writeHead(302, {
+									Location: `/create`,
+								});
+
+							const userId = results[0].id;
+
+							connection.query(
+								`INSERT INTO topic (title, description, created, author_id) VALUES (?, ?, NOW(), ?)`,
+								[titleFiltered, description, userId],
+								(err, results) => {
+									if (err) throw err;
+
+									response.writeHead(302, {
+										Location: `/?id=${results.insertId}`,
+									});
+									response.end();
+								}
+							);
+						}
+					);
+				}
+			);
+		}
 	});
 };
 

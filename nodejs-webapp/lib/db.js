@@ -7,6 +7,8 @@ const connection = mysql.createConnection({
 	user: "temp_user",
 	password: "yk0425",
 	database: "board_node",
+	// allow multiple sql statements to be executed. (not recommended for security)
+	// multipleStatements: true,
 });
 
 connection.connect();

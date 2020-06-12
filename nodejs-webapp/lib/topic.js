@@ -7,7 +7,7 @@ var path = require("path");
 var connection = require("./db");
 var template = require("./template");
 
-exports.home = function (request, response) {
+exports.home = function (request, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, results) => {
 		if (err) throw err; // if error occurs, console prints the error and this app stops.
 
@@ -25,7 +25,7 @@ exports.home = function (request, response) {
 	});
 };
 
-exports.page = function (request, response) {
+exports.page = function (request, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 		// using ? in sql query blocks possible hacking attempts.
@@ -46,11 +46,11 @@ exports.page = function (request, response) {
 						list,
 						`<h2>${title}</h2><p>${data}</p>`,
 						`<a href="/create">create</a>
-                     <a href="/update?id=${queryData.id}">update</a>
-                     <form action="/delete_process" method="post">
-                         <input type="hidden" name="id" value="${queryData.id}">
-                        <input type="submit" value="delete">
-                     </form>`
+                        <a href="/update?id=${queryData.id}">update</a>
+                        <form action="/delete_process" method="post">
+                            <input type="hidden" name="id" value="${queryData.id}">
+                            <input type="submit" value="delete">
+                        </form>`
 					);
 					response.writeHead(200);
 					response.end(html);
@@ -62,7 +62,7 @@ exports.page = function (request, response) {
 	});
 };
 
-exports.create = function (request, response) {
+exports.create = function (request, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 
@@ -86,7 +86,7 @@ exports.create = function (request, response) {
 	});
 };
 
-exports.createProcess = function (request, response) {
+exports.createProcess = function (request, response, queryData) {
 	// * POST 전송 데이터를 수신하는 이벤트
 	// POST 전송 데이터가 매우 많은 경우를 대비하여 데이터의 일부를 수신할 때마다 콜백함수를 호출하여 데이터를 저장한다.
 	let body = "";
@@ -123,7 +123,7 @@ exports.createProcess = function (request, response) {
 	});
 };
 
-exports.update = function (request, response) {
+exports.update = function (request, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 
@@ -162,7 +162,7 @@ exports.update = function (request, response) {
 	});
 };
 
-exports.updateProcess = function (request, response) {
+exports.updateProcess = function (request, response, queryData) {
 	let body = "";
 	request.on("data", function (data) {
 		body += data;
@@ -191,7 +191,7 @@ exports.updateProcess = function (request, response) {
 	});
 };
 
-exports.deleteProcess = function (request, response) {
+exports.deleteProcess = function (request, response, queryData) {
 	let body = "";
 	request.on("data", function (data) {
 		body += data;

@@ -4,6 +4,7 @@ var url = require("url");
 
 // module self-made
 var topic = require("./lib/topic");
+var user = require("./lib/user");
 
 // * http.createServer(requestListener); http.Server 객체를 반환한다.
 // * The requestListener is a function which is automatically added to the 'request' event.
@@ -16,18 +17,28 @@ var app = http.createServer(function (request, response) {
 	var pathname = url.parse(_url, true).pathname; // queryString 제외한 path 반환
 
 	if (pathname === "/") {
-		if (queryData.id === undefined) topic.home(request, response);
-		else topic.page(request, response);
+		if (queryData.id === undefined) topic.home(request, response, queryData);
+		else topic.page(request, response, queryData);
 	} else if (pathname === "/create") {
-		topic.create(request, response);
+		topic.create(request, response, queryData);
 	} else if (pathname === "/create_process") {
-		topic.createProcess(request, response);
+		topic.createProcess(request, response, queryData);
 	} else if (pathname === "/update") {
-		topic.update(request, response);
+		topic.update(request, response, queryData);
 	} else if (pathname === "/update_process") {
-		topic.updateProcess(request, response);
+		topic.updateProcess(request, response, queryData);
 	} else if (pathname === "/delete_process") {
-		topic.deleteProcess(request, response);
+		topic.deleteProcess(request, response, queryData);
+	} else if (pathname === "/author") {
+		user.home(request, response, queryData);
+	} else if (pathname === "/create_author_process") {
+		user.createProcess(request, response, queryData);
+	} else if (pathname === "/update_author") {
+		user.update(request, response, queryData);
+	} else if (pathname === "/update_author_process") {
+		user.updateProcess(request, response, queryData);
+	} else if (pathname === "/delete_author_process") {
+		user.deleteProcess(request, response, queryData);
 	} else {
 		response.writeHead(404);
 		response.end("Not found");

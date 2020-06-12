@@ -51,11 +51,24 @@ var template = {
 						border: 1px solid black;
 						padding: 5px 10px;
 					}
+
+					.para {
+						border: 1px solid #4c4c4c;
+						padding: 10px;
+						width: 30%;
+					}
+					.sub_info {
+						display: inline-block;
+						font-style: italic;
+						color: brown;
+						margin-top: 0;
+						padding-top: 0;
+					}
 					
 					</style>
 				</head>
 				<body>
-					<h1><a href="/">WEB</a></h1>
+					<h1><a href="/">Welcome to CEPO</a></h1>
 					<a href="/author">author</a>
 					${list}
 					${crud ? crud : ""}

@@ -21,7 +21,9 @@ exports.home = function (request, response, queryData) {
 			`<h2>${title}</h2><p>${data}</p>`,
 			`<a href="/create">create</a>`
 		);
-		response.writeHead(200);
+		response.writeHead(200, {
+			"Set-Cookie": ["cookie1=cookieValue", "cookie2=cookieValue"], // set cookie
+		});
 		response.end(html);
 	});
 };

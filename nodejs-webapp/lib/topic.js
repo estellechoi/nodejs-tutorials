@@ -7,10 +7,24 @@ var path = require("path");
 var connection = require("./db");
 var template = require("./template");
 var sanitizeHtml = require("sanitize-html"); // remove dangerous scripting part user created.
+const cookie = require("cookie");
 
-exports.home = function (request, response, queryData) {
+// check if the client has cookie named sessionId
+function checkSessionId(req) {
+	let hasSession = false;
+	let cookies = {};
+	if (req.headers.cookie) cookies = cookie.parse(req.headers.cookie);
+	if (cookies.sessionId && cookies.sessionId === "s1Oe1") hasSession = true;
+
+	return hasSession;
+}
+
+exports.home = function (req, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, results) => {
 		if (err) throw err; // if error occurs, console prints the error and this app stops.
+
+		const hasSession = checkSessionId(req);
+		const uiByAuth = hasSession ? `<a href="/create">create</a>` : "";
 
 		const title = "Welcome";
 		const data = "Hello node.js";
@@ -19,16 +33,16 @@ exports.home = function (request, response, queryData) {
 			title,
 			list,
 			`<h2>${title}</h2><p>${data}</p>`,
-			`<a href="/create">create</a>`
+			uiByAuth,
+			"",
+			hasSession
 		);
-		response.writeHead(200, {
-			"Set-Cookie": ["cookie1=cookieValue", "cookie2=cookieValue"], // set cookie
-		});
+		response.writeHead(200);
 		response.end(html);
 	});
 };
 
-exports.page = function (request, response, queryData) {
+exports.page = function (req, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 		// using ? in sql query blocks possible hacking attempts.
@@ -44,6 +58,9 @@ exports.page = function (request, response, queryData) {
 				const author = results[0].name ? results[0].name : "Anonymous user";
 
 				const list = template.getList(topics);
+
+				const hasSession = checkSessionId(req);
+
 				const html = template.getHTML(
 					title,
 					list,
@@ -55,7 +72,9 @@ exports.page = function (request, response, queryData) {
                         <form action="/delete_process" method="post">
                             <input type="hidden" name="id" value="${queryData.id}">
                             <input type="submit" value="delete">
-                        </form>`
+						</form>`,
+					"",
+					hasSession
 				);
 				response.writeHead(200);
 				response.end(html);
@@ -64,13 +83,16 @@ exports.page = function (request, response, queryData) {
 	});
 };
 
-exports.create = function (request, response, queryData) {
+exports.create = function (req, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 
 		const title = "<div>Create</div>";
 		console.log(title);
 		const list = template.getList(topics);
+
+		const hasSession = checkSessionId(req);
+
 		const html = template.getHTML(
 			title,
 			list,
@@ -83,28 +105,30 @@ exports.create = function (request, response, queryData) {
                 <input type="submit" value="ok"><br>
             </form>
             `,
-			title
+			title,
+			"",
+			hasSession
 		);
 		response.writeHead(200); // 응답코드
 		response.end(html); // template 을 응답
 	});
 };
 
-exports.createProcess = function (request, response, queryData) {
+exports.createProcess = function (req, response, queryData) {
 	// * POST 전송 데이터를 수신하는 이벤트
 	// POST 전송 데이터가 매우 많은 경우를 대비하여 데이터의 일부를 수신할 때마다 콜백함수를 호출하여 데이터를 저장한다.
 	let body = "";
-	request.on("data", (data) => {
+	req.on("data", (data) => {
 		body += data;
 		// if too much POST data, kill the connection. (for security)
 		// 1e6 : Math.pow(10, 6) === 1 * 1000000 ~ 1MB
 		if (body.length > 1e6) {
-			request.connection.destroy();
+			req.connection.destroy();
 		}
 	});
 
-	// on end of sending request data
-	request.on("end", () => {
+	// on end of sending req data
+	req.on("end", () => {
 		// 수신한 POST 데이터 객체
 		const postData = qs.parse(body);
 		const title = postData.title; // encodeURI vs qs.escape() ?
@@ -152,7 +176,7 @@ exports.createProcess = function (request, response, queryData) {
 	});
 };
 
-exports.update = function (request, response, queryData) {
+exports.update = function (req, response, queryData) {
 	connection.query(`SELECT * FROM topic`, (err, topics) => {
 		if (err) throw err;
 
@@ -168,6 +192,9 @@ exports.update = function (request, response, queryData) {
 					const title = res.title;
 					const data = res.description;
 					const list = template.getList(topics);
+
+					const hasSession = checkSessionId(req);
+
 					const html = template.getHTML(
 						title,
 						list,
@@ -179,7 +206,9 @@ exports.update = function (request, response, queryData) {
                             <input type="submit" value="ok"><br>
                         </form>
                         `,
-						"Update"
+						"Update",
+						"",
+						hasSession
 					);
 					response.writeHead(200); // 응답코드
 					response.end(html); // template 을 응답
@@ -191,12 +220,12 @@ exports.update = function (request, response, queryData) {
 	});
 };
 
-exports.updateProcess = function (request, response, queryData) {
+exports.updateProcess = function (req, response, queryData) {
 	let body = "";
-	request.on("data", function (data) {
+	req.on("data", function (data) {
 		body += data;
 	});
-	request.on("end", function () {
+	req.on("end", function () {
 		// 수신한 POST 데이터를 담은 객체를 반환
 		const postData = qs.parse(body);
 		const id = postData.id;
@@ -220,12 +249,12 @@ exports.updateProcess = function (request, response, queryData) {
 	});
 };
 
-exports.deleteProcess = function (request, response, queryData) {
+exports.deleteProcess = function (req, response, queryData) {
 	let body = "";
-	request.on("data", function (data) {
+	req.on("data", function (data) {
 		body += data;
 	});
-	request.on("end", function () {
+	req.on("end", function () {
 		const postData = qs.parse(body);
 		const id = postData.id;
 		const idFiltered = path.parse(id).base; // 요청 id 필터링 (보안처리)

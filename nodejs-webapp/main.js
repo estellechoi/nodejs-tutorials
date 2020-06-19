@@ -3,45 +3,52 @@ var http = require("http");
 var url = require("url");
 
 // module self-made
-var topic = require("./lib/topic");
-var user = require("./lib/user");
+const topic = require("./lib/topic");
+const user = require("./lib/user");
+const auth = require("./lib/auth");
 
 // * http.createServer(requestListener); http.Server 객체를 반환한다.
 // * The requestListener is a function which is automatically added to the 'request' event.
 // -> 웹어플리케이션 접속시마다 createServer의 콜백함수가 호출된다.
-var app = http.createServer(function (request, response) {
-	var _url = request.url; // 사용자 요청에서 url을 반환
+var app = http.createServer(function (req, res) {
+	var _url = req.url; // 사용자 요청에서 url을 반환
 	console.log(url.parse(_url, true)); // 해당 url을 파싱하여 객체를 반환
 
 	var queryData = url.parse(_url, true).query; // query String 정보를 담은 객체 반환
 	var pathname = url.parse(_url, true).pathname; // queryString 제외한 path 반환
 
 	if (pathname === "/") {
-		if (queryData.id === undefined) topic.home(request, response, queryData);
-		else topic.page(request, response, queryData);
+		if (queryData.id === undefined) topic.home(req, res, queryData);
+		else topic.page(req, res, queryData);
 	} else if (pathname === "/create") {
-		topic.create(request, response, queryData);
+		topic.create(req, res, queryData);
 	} else if (pathname === "/create_process") {
-		topic.createProcess(request, response, queryData);
+		topic.createProcess(req, res, queryData);
 	} else if (pathname === "/update") {
-		topic.update(request, response, queryData);
+		topic.update(req, res, queryData);
 	} else if (pathname === "/update_process") {
-		topic.updateProcess(request, response, queryData);
+		topic.updateProcess(req, res, queryData);
 	} else if (pathname === "/delete_process") {
-		topic.deleteProcess(request, response, queryData);
+		topic.deleteProcess(req, res, queryData);
 	} else if (pathname === "/author") {
-		user.home(request, response, queryData);
+		user.home(req, res, queryData);
 	} else if (pathname === "/create_author_process") {
-		user.createProcess(request, response, queryData);
+		user.createProcess(req, res, queryData);
 	} else if (pathname === "/update_author") {
-		user.update(request, response, queryData);
+		user.update(req, res, queryData);
 	} else if (pathname === "/update_author_process") {
-		user.updateProcess(request, response, queryData);
+		user.updateProcess(req, res, queryData);
 	} else if (pathname === "/delete_author_process") {
-		user.deleteProcess(request, response, queryData);
+		user.deleteProcess(req, res, queryData);
+	} else if (pathname === "/signin") {
+		auth.signin(req, res, queryData, pathname);
+	} else if (pathname === "/signin_process") {
+		auth.signinProcess(req, res, queryData, pathname);
+	} else if (pathname === "/signout_process") {
+		auth.signoutProcess(req, res, queryData, pathname);
 	} else {
-		response.writeHead(404);
-		response.end("Not found");
+		res.writeHead(404);
+		res.end("Not found");
 	}
 });
 

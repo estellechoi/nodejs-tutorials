@@ -1,5 +1,5 @@
 // templates
-var template = {
+const template = {
 	getHTML: function (title, list, body, crud, path, auth) {
 		const uiByAuth = auth
 			? `Hello, estele.choi@gmail.com! If you want to sign out, click <a href="/signout_process">here</a>`
@@ -90,20 +90,20 @@ var template = {
 		`;
 	},
 	getList: function (data) {
-		var list = "<ul>";
+		let list = "<ul>";
 		data.forEach(function (item) {
 			// var li = `<li><a href="/?id=${item}">${item}</a></li>`;
-			var li = `<li><a href="/?id=${item.id}">${item.title}</a></li>`;
+			const li = `<li><a href="/?id=${item.id}">${item.title}</a></li>`;
 			list += li;
 		});
 		list = list + "</ul>";
 		return list;
 	},
 	getTable: function (data) {
-		var table = "<table>";
-		var style = ``;
+		let table = "<table>";
+		let style = ``;
 		data.forEach((item) => {
-			var tr = `<tr>
+			const tr = `<tr>
 						<td>${item.id}</td>
 						<td>${item.name}</td>
 						<td>${item.profile}</td>
@@ -115,8 +115,8 @@ var template = {
 		return table + style;
 	},
 	getUpdateTable: function (data) {
-		var table = "<table>";
-		var style = `
+		let table = "<table>";
+		const style = `
 					<style>
 						table {
 							border-collapse: collapse;
@@ -129,7 +129,7 @@ var template = {
 					</style>
 					`;
 		data.forEach((item) => {
-			var tr = `<tr>
+			const tr = `<tr>
 						<form action="/update_author_process" method="post">
 							<input type="hidden" name="id" value="${item.id}"/>
 							<td>${item.id}</td>

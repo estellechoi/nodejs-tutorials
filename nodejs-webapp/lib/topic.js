@@ -2,11 +2,11 @@
 // exports.moduleName = ...; 여러 개의 모듈을 exports 객체에 담아서 export ?
 
 // modules
-var qs = require("querystring");
-var path = require("path");
-var connection = require("./db");
-var template = require("./template");
-var sanitizeHtml = require("sanitize-html"); // remove dangerous scripting part user created.
+const qs = require("querystring");
+const path = require("path");
+const connection = require("./db");
+const template = require("./template");
+const sanitizeHtml = require("sanitize-html"); // remove dangerous scripting part user created.
 const cookie = require("cookie");
 
 // check if the client has cookie named sessionId

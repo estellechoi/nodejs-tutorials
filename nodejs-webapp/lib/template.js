@@ -1,6 +1,18 @@
-// 객체 리터럴 패턴으로 연관된 변수와 함수를 하나의 객체에 담아보자.
+// templates
 var template = {
-	getHTML: function (title, list, body, crud) {
+	getHTML: function (title, list, body, crud, path, auth) {
+		const uiByAuth = auth
+			? `Hello, estele.choi@gmail.com! If you want to sign out, click <a href="/signout_process">here</a>`
+			: `<a href="/author">author</a><a href="/signin">Sign in</a>`;
+
+		const uiByPath =
+			path && path === "/signin"
+				? ""
+				: `
+				<p>
+				 ${uiByAuth}
+				</p>`;
+
 		// Template Literals
 		return `
 				<!doctype html>
@@ -69,7 +81,7 @@ var template = {
 				</head>
 				<body>
 					<h1><a href="/">Welcome to CEPO</a></h1>
-					<a href="/author">author</a>
+					${uiByPath}
 					${list}
 					${crud ? crud : ""}
 					${body}

@@ -16,6 +16,10 @@ http
 				"cookie1=choco", // session cookie
 				"cookie2=strawberry",
 				`Permanent=cookies; Max-Age=${60 * 60 * 24 * 30}`, // permanent cookie with max valid number of seconds
+				"cookie3=orange; Secure", // this cookie disabled when http connection, not https.
+				"cookie4=milk; HttpOnly", // cannot access this cookie using javaScript like document.cookie
+				"cookie5=coke; Path=/coke", // limit the range of this cookie beneath the path '/coke'.
+				"cookie6=apple; Domain=o2.io", // limit the range of this cookie for the domain of '*.o2.io'.
 			],
 		});
 		res.end("Cookie Test");

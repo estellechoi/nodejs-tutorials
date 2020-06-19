@@ -1,6 +1,6 @@
 // modules of node.js (내장모듈)
-var http = require("http");
-var url = require("url");
+const http = require("http");
+const url = require("url");
 
 // module self-made
 const topic = require("./lib/topic");
@@ -10,12 +10,12 @@ const auth = require("./lib/auth");
 // * http.createServer(requestListener); http.Server 객체를 반환한다.
 // * The requestListener is a function which is automatically added to the 'request' event.
 // -> 웹어플리케이션 접속시마다 createServer의 콜백함수가 호출된다.
-var app = http.createServer(function (req, res) {
-	var _url = req.url; // 사용자 요청에서 url을 반환
+const app = http.createServer(function (req, res) {
+	const _url = req.url; // 사용자 요청에서 url을 반환
 	console.log(url.parse(_url, true)); // 해당 url을 파싱하여 객체를 반환
 
-	var queryData = url.parse(_url, true).query; // query String 정보를 담은 객체 반환
-	var pathname = url.parse(_url, true).pathname; // queryString 제외한 path 반환
+	const queryData = url.parse(_url, true).query; // query String 정보를 담은 객체 반환
+	const pathname = url.parse(_url, true).pathname; // queryString 제외한 path 반환
 
 	if (pathname === "/") {
 		if (queryData.id === undefined) topic.home(req, res, queryData);
